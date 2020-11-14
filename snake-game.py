@@ -3,11 +3,12 @@ import time
 import random
 
 
-# Write score
+# Write headers
 def write_score(score, high_score):
     pen_score.goto(-575, 350)
     pen_score.clear()
     pen_score.write("Score: {}    High Score: {}".format(score, high_score), align="left", font=("Courier", 24, "normal"))
+
 
 def write_time():
     pen_time.goto(400, 350)
@@ -15,20 +16,23 @@ def write_time():
     global game_started
     global game_elapsed_time
 
-    if game_started == False:
+    if not game_started:
         pen_time.write("Time: {}".format(0), align="left", font=("Courier", 24, "normal"))
     else:
         pen_time.write("Time: {}".format(game_elapsed_time), align="left", font=("Courier", 24, "normal"))
+
 
 def write_bonus():
     pen_bonus.goto(80, 355)
     pen_bonus.clear()
     pen_bonus.write("BONUS!", align="center", font=("Courier", 16, "bold"))
 
+
 def write_power():
     pen_power.goto(260, 355)
     pen_power.clear()
     pen_power.write("POWER!", align="center", font=("Courier", 16, "bold"))
+
 
 # Movement functions
 def move():
@@ -49,68 +53,76 @@ def go_up():
     if head.direction != "down":
         head.direction = "up"
 
+
 def go_down():
     if head.direction != "up":
         head.direction = "down"
+
 
 def go_left():
     if head.direction != "right":
         head.direction = "left"
 
+
 def go_right():
     if head.direction != "left":
         head.direction = "right"
 
-# Game control functions:
 
+# Game control functions:
 def toggle_bonus_cereal_active():
     global bonus_cereal_activated
     global bonus_cereal_activation_time
-    if bonus_cereal_activated == True:
+    if bonus_cereal_activated:
         bonus_cereal_activated = False
     else:
         bonus_cereal_activated = True
     bonus_cereal_activation_time = int(time.time())
 
+
 def toggle_bonus_cereal_showing():
     global bonus_cereal_showing
-    if bonus_cereal_showing == True:
+    if bonus_cereal_showing:
         bonus_cereal_showing = False
     else:
         bonus_cereal_showing = True
+
 
 def toggle_power_bar_active():
     global power_bar_activated
     global power_bar_activation_time
     global delay
     global power_bar_elapsed_time
-    if power_bar_activated == True:
+    if power_bar_activated:
         power_bar_activated = False
         delay = 0.05
         power_bar_elapsed_time = 0
     else:
         power_bar_activated = True
         delay = 0.025
-
     power_bar_activation_time = int(time.time())
+
 
 def toggle_power_bar_showing():
     global power_bar_showing
-    if power_bar_showing == True:
+    if power_bar_showing:
         power_bar_showing = False
     else:
         power_bar_showing = True
 
+
 def toggle_pause():
     global is_paused
-    if is_paused == True:
+    if is_paused:
         is_paused = False
     else:
         is_paused = True
 
-def quit():
+
+def quit_game():
     global running
     running = False
+
 
 # Food functions
 def move_food():
@@ -120,17 +132,20 @@ def move_food():
     food_y = random.randint(-19, 19) * 20
     food.goto(food_x, food_y)
 
+
 def move_bonus_cereal():
     x = random.randint(-29, 29) * 20
     y = random.randint(-19, 19) * 20
     bonus_cereal.goto(x, y)
     toggle_bonus_cereal_showing()
 
+
 def move_power_bar():
     x = random.randint(-29, 29) * 20
     y = random.randint(-19, 19) * 20
     power_bar.goto(x, y)
     toggle_power_bar_showing()
+
 
 # Main game
 if __name__ == '__main__':
@@ -250,20 +265,36 @@ if __name__ == '__main__':
     wn.onkeypress(go_left, "Left")
     wn.onkeypress(go_right, "Right")
     wn.onkeypress(toggle_pause, "p")
-    wn.onkeypress(quit, "Escape")
+    wn.onkeypress(quit_game, "Escape")
 
     write_time()
 
     # Main game loop
     while running:
+        if is_paused:
+            pen_pause = turtle.Turtle()
+            pen_pause.color("white")
+            pen_pause.speed(0)
+            pen_pause.penup()
+            pen_pause.hideturtle()
+            pen_pause.goto(0, 0)
+            pen_pause.clear()
+            pen_pause.write("Game is paused", align="center", font=("Courier", 24, "normal"))
+            # Stop time
+            game_start_time = time.time() - game_elapsed_time
+            bonus_cereal_activation_time = int(time.time() - bonus_cereal_elapsed_time)
+            power_bar_activation_time = int(time.time() - power_bar_elapsed_time)
 
-        if not is_paused:
+            wn.update()
+            pen_pause.clear()
+
+        else:
             wn.update()
 
             # Start time
             if head.direction == "stop":
                 game_started = False
-            if game_started == False and head.direction != "stop":
+            if not game_started and head.direction != "stop":
                 game_start_time = time.time()
                 game_started = True
             game_elapsed_time = int(time.time() - game_start_time)
@@ -298,7 +329,6 @@ if __name__ == '__main__':
                 pen_power.clear()
                 pen_power_timer.clear()
 
-
                 # Reset the score
                 score = 0
 
@@ -319,8 +349,6 @@ if __name__ == '__main__':
                 segments.append(new_segment)
 
                 # Spawn power bar
-                print(power_bar_activated)
-                print(power_bar_showing)
                 if not power_bar_activated and not power_bar_showing:
                     if random.randint(0, 4) == 0:
                         move_power_bar()
@@ -438,28 +466,5 @@ if __name__ == '__main__':
 
                     # Update the score display
                     write_score(str(score), str(high_score))
-
             time.sleep(delay)
-        else:
-            pen_pause = turtle.Turtle()
-            pen_pause.color("white")
-            pen_pause.speed(0)
-            pen_pause.penup()
-            pen_pause.hideturtle()
-            pen_pause.goto(0, 0)
-            pen_pause.clear()
-            pen_pause.write("Game is paused", align="center", font=("Courier", 24, "normal"))
-            # Stop time
-            game_start_time = time.time() - game_elapsed_time
-            bonus_cereal_activation_time = int(time.time() - bonus_cereal_elapsed_time)
-            power_bar_activation_time = int(time.time() - power_bar_elapsed_time)
-
-            wn.update()
-            pen_pause.clear()
     wn.bye()
-
-
-
-
-
-
